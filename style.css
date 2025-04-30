@@ -194,3 +194,12 @@ body {
         display: none !important;
     }
 }
+
+/* Prevent blue overlay / selection on tap or click */
+* {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
