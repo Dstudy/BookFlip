@@ -9,24 +9,72 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-
     font-family: sans-serif;
     background-color: powderblue;
-}
-
-html, body {
     overflow: hidden;
+    position: relative;
 }
 
+/* Book and container */
+.book-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    position: relative;
+}
 
-/* Book */
 .book {
     position: relative;
     width: 551px;
     height: 780px;
+    max-width: 90vw;
+    max-height: 90vh;
     transition: transform 0.5s;
+    aspect-ratio: 551/780;
+    cursor: pointer; /* Add cursor pointer to indicate clickable */
 }
 
+/* Move the middle line to center of open book */
+.book.book-open::after {
+    left: 0%; /* adjust based on transform: translateX(50%) */
+}
+
+/* Left and right debug indicators */
+.book-left-zone, .book-right-zone {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    /* background-color: rgba(0, 0, 255, 0.1); */
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.book-left-zone {
+    left: 0;
+}
+
+.book-right-zone {
+    right: 0;
+}
+
+/* Ensure aspect ratio is maintained */
+@media (max-aspect-ratio: 551/780) {
+    .book {
+        height: auto;
+        width: 90vw;
+    }
+}
+
+@media (min-aspect-ratio: 551/780) {
+    .book {
+        width: auto;
+        height: 90vh;
+    }
+}
 
 .paper {
     position: absolute;
@@ -35,7 +83,6 @@ html, body {
     top: 0;
     left: 0;
     perspective: 2500px;
-
 }
 
 .a4-image {
@@ -43,8 +90,8 @@ html, body {
     height: 100%;
     object-fit: contain;
     display: block;
+    pointer-events: none; /* Prevent image from capturing clicks */
 }
-
 
 .front,
 .back {
@@ -87,66 +134,63 @@ html, body {
     transform: rotateY(-180deg);
 }
 
-/* Controller Buttons */
-button {
-    border: none;
-    background-color: #1d3392;
-    cursor: pointer;
-    transition: transform 0.5s;
-
-    font-size: 2rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-}
-
-button:focus {
-    outline: none;
-}
-
-button:hover i {
-    color: #636363;
-}
-
-i {
-    font-size: 50px;
-    color: gray;
-}
-
-/* Paper stack order */
-#p1 {
-    z-index: 3;
-}
-
-#p2 {
-    z-index: 2;
-}
-
-#p3 {
-    z-index: 1;
-}
-
-.circle-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: #f0f0f0;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    display: flex;
+/* Orientation warning */
+#rotate-warning {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: powderblue;
+    color: #333;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s, transform 0.2s;
+    z-index: 9999;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 20px;
 }
 
-.circle-btn:hover {
-    background-color: #e0e0e0;
+#rotate-warning img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    animation: rotate 2s infinite ease-in-out;
+}
+
+/* Continue anyway button */
+.continue-btn {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #fff;
+    color: #333;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+    background-color: #f0f0f0;
     transform: scale(1.05);
 }
 
+.continue-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+}
+
+/* Hide rotation warning on devices that don't support orientation change */
+@media screen and (min-width: 1024px) {
+    #rotate-warning {
+        display: none !important;
+    }
+}
