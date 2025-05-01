@@ -164,3 +164,206 @@ window.addEventListener('load', handleResize);
 
 // Initial check on page load
 checkOrientation();
+
+//Image Floating
+
+// Configuration
+const config = {
+    numImages: 10,
+    minSpeed: 0.5, // Smaller value for slower movement
+    maxSpeed: 2,   // Smaller max value
+    minSizePercent: 35,  // Size as percentage of viewport width
+    maxSizePercent: 40, // Size as percentage of viewport width
+    minHorizontalSpace: 0.3 // minimum horizontal space between images (as a ratio of window width)
+};
+
+// Image objects array to track all properties
+const floatingImages = [];
+
+// Image URLs
+const imageUrls = [
+    'background-float/image1.png',
+    'background-float/image2.png',
+    'background-float/image3.png',
+    'background-float/image4.png',
+    'background-float/image5.png',
+    'background-float/image6.png',
+    'background-float/image7.png',
+    'background-float/image8.png',
+    'background-float/image9.png',
+    'background-float/image10.png',
+];
+
+// Calculate size based on screen dimensions
+function calculateSize(sizePercent) {
+    // Use the smaller dimension (width or height) to determine size
+    const baseDimension = Math.min(window.innerWidth, window.innerHeight);
+    return (baseDimension * sizePercent) / 100;
+}
+
+// Find a non-overlapping horizontal position
+function findNonOverlappingPosition(imageSize) {
+    const minDistance = window.innerWidth * config.minHorizontalSpace;
+    let x, isOverlapping;
+    
+    // Try to find a non-overlapping position (max 15 attempts)
+    let attempts = 0;
+    do {
+        attempts++;
+        isOverlapping = false;
+        x = Math.random() * (window.innerWidth - imageSize);
+        
+        // Check if this position overlaps with existing images
+        for (const img of floatingImages) {
+            if (img.element && Math.abs(x - img.x) < minDistance) {
+                isOverlapping = true;
+                break;
+            }
+        }
+    } while (isOverlapping && attempts < 15);
+    
+    return x;
+}
+
+// Initialize floating images
+function initializeFloatingImages() {
+    for (let i = 0; i < config.numImages; i++) {
+        // Create image element
+        const imgElement = document.createElement('img');
+        imgElement.className = 'floating-image';
+        
+        // Select an image (each image gets a different one)
+        imgElement.src = imageUrls[i % imageUrls.length];
+        
+        // Random size as percentage of viewport
+        const sizePercent = Math.random() * (config.maxSizePercent - config.minSizePercent) + config.minSizePercent;
+        const size = calculateSize(sizePercent);
+        imgElement.style.width = `${size}px`;
+        
+        // Find position
+        const x = findNonOverlappingPosition(size);
+        
+        // Random vertical start position (staggered)
+        const y = window.innerHeight + (Math.random() * window.innerHeight);
+        
+        // Speed scaled to viewport height (slower on larger screens)
+        const baseSpeed = Math.random() * (config.maxSpeed - config.minSpeed) + config.minSpeed;
+        const speed = baseSpeed * (window.innerHeight / 1000); // Normalize for screen height
+        
+        // Higher opacity for better visibility (0.6 to 0.9)
+        const opacity = 1;
+        
+        // Store image data with size percentage instead of absolute size
+        const imageData = {
+            element: imgElement,
+            x: x,
+            y: y,
+            sizePercent: sizePercent,
+            size: size,
+            speed: speed,
+            opacity: opacity
+        };
+        
+        // Add to array
+        floatingImages.push(imageData);
+        
+        // Set initial position and opacity
+        imgElement.style.left = `${x}px`;
+        imgElement.style.top = `${y}px`;
+        imgElement.style.opacity = opacity;
+        
+        // Add to DOM
+        document.body.appendChild(imgElement);
+    }
+}
+
+// Animation loop
+function animateImages() {
+    for (const img of floatingImages) {
+        // Move upward
+        img.y -= img.speed;
+        
+        // If image is completely off screen, reset to bottom with new properties
+        if (img.y + img.size < 0) {
+            // Reset position to below screen
+            img.y = window.innerHeight + (Math.random() * 50);
+            
+            // New random size percentage
+            img.sizePercent = Math.random() * (config.maxSizePercent - config.minSizePercent) + config.minSizePercent;
+            img.size = calculateSize(img.sizePercent);
+            
+            // Find new horizontal position
+            img.x = findNonOverlappingPosition(img.size);
+            
+            // New random speed
+            const baseSpeed = Math.random() * (config.maxSpeed - config.minSpeed) + config.minSpeed;
+            img.speed = baseSpeed * (window.innerHeight / 1000);
+            
+            // New random opacity (higher range for better visibility)
+            img.opacity = 1;
+            
+            // Update image size
+            img.element.style.width = `${img.size}px`;
+            
+            // Reset opacity at bottom
+            img.element.style.opacity = img.opacity;
+        } else if (img.y < 100) {
+            // Only fade out in the top 100px of screen
+            const fadeRatio = Math.max(0, img.y / 100);
+            img.element.style.opacity = fadeRatio * img.opacity;
+        }
+        
+        // Update position
+        img.element.style.left = `${img.x}px`;
+        img.element.style.top = `${img.y}px`;
+    }
+    
+    requestAnimationFrame(animateImages);
+}
+
+// Update all image sizes when window resizes
+function updateImagesForResize() {
+    for (const img of floatingImages) {
+        // Recalculate size based on new screen dimensions
+        img.size = calculateSize(img.sizePercent);
+        img.element.style.width = `${img.size}px`;
+        
+        // Update speed based on new screen height
+        const baseSpeed = Math.random() * (config.maxSpeed - config.minSpeed) + config.minSpeed;
+        img.speed = baseSpeed * (window.innerHeight / 1000);
+        
+        // Make sure images are still within screen bounds
+        if (img.x + img.size > window.innerWidth) {
+            img.x = window.innerWidth - img.size;
+        }
+    }
+}
+
+// Initialize and start animation on page load
+window.addEventListener('load', () => {
+    initializeFloatingImages();
+    requestAnimationFrame(animateImages);
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    // Option 1: Update existing images for new screen size
+    updateImagesForResize();
+    
+    // Option 2: Complete reset (uncomment below if you prefer this approach)
+    /*
+    // Remove all existing images
+    for (const img of floatingImages) {
+        if (img.element && img.element.parentNode) {
+            img.element.remove();
+        }
+    }
+    
+    // Clear the array
+    floatingImages.length = 0;
+    
+    // Reinitialize
+    initializeFloatingImages();
+    */
+});
+  

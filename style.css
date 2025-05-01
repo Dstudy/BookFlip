@@ -207,3 +207,10 @@ body {
 html, body {
     touch-action: manipulation;
 }
+
+.floating-image {
+    position: absolute;
+    pointer-events: none;
+    transition: opacity 1s;
+    z-index: -1; /* Ensure images are behind other content */
+}
