@@ -99,6 +99,7 @@ function goNextPage() {
         if (paper) {
             paper.classList.add("flipped");
             paper.style.zIndex = currentLocation;
+            console.log("Paper next" + currentLocation);
         }
 
         if (currentLocation === totalPapers) closeBook(false);
@@ -116,6 +117,7 @@ function goPrevPage() {
         if (paper) {
             paper.classList.remove("flipped");
             paper.style.zIndex = totalPapers - currentLocation + 2;
+            console.log("Paper prev" + currentLocation);
         }
 
         if (currentLocation === totalPapers + 1) openBook();
