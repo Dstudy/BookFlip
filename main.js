@@ -4,7 +4,7 @@ const rotateWarning = document.querySelector("#rotate-warning");
 const continueAnywayBtn = document.querySelector("#continue-anyway");
 
 const papers = [];
-const totalPapers = 12;
+const totalPapers = 11;
 
 
 // Initialize papers array and set proper z-index
